@@ -1,8 +1,9 @@
 import Colors from '@/constants/Colors';
-import { Stack } from 'expo-router';
+import { isClerkAPIResponseError, useSignIn, useSignUp } from '@clerk/clerk-expo';
+import { Stack, router, Link } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import {
     CodeField,
     Cursor,
@@ -13,34 +14,86 @@ import {
 const CELL_COUNT = 6;
 
 const Page = () => {
-    const { phone, signIn } = useLocalSearchParams<{phone: string, signIn: string}>();
+    const { phone, signin } = useLocalSearchParams<{phone: string, signin: string}>();
     const [code, setCode] = useState("");
     const ref = useBlurOnFulfill({value: code, cellCount: CELL_COUNT});
     const [props, getCellOnLayoutHandler] = useClearByFocusCell({
       value: code,
       setValue: setCode,
     });
+    const { signUp, setActive} = useSignUp();
+    const { signIn } = useSignIn();
 
-    useEffect(() => {
-      if(code.length === 6) {
-        if(signIn === 'true') {
-          verifySignIn();
-        } else {
-          verifyCode();
-        }
-      }
-    }, [code])
+    // useEffect(() => {
+    //   if(code.length === 6) {
+    //     if(signin === 'true') {
+    //       verifySignIn();
+    //     } else {
+    //       verifyCode();
+    //     }
+    //   }
+    // }, [code])
 
     const verifyCode = async () => {
-        
+      try {
+        await signUp!?.attemptPhoneNumberVerification({
+          code
+        })
+
+        await setActive!({ session: signUp?.createdSessionId})
+      } catch (error) {
+        console.log('Error', JSON.stringify(error, null, 2));
+        if(isClerkAPIResponseError(error)) {
+          Alert.alert('Error', error.errors[0].message)
+        }
+      }
     }
 
-    const verifySignIn = () => {
+    const verifySignIn = async () => {
+      try {
+        await signIn!.attemptFirstFactor({
+          strategy: 'phone_code',
+          code
+        })
 
+        await setActive!({ session: signIn!.createdSessionId });
+      } catch (error) {
+        console.log('Error', JSON.stringify(error, null, 2));
+        if(isClerkAPIResponseError(error)){
+          Alert.alert('Error', error.errors[0].message);
+        }
+      }
     }
 
-    const resendCode = () => {
-
+    const resendCode = async () => {
+      try {
+        if (signin === 'true') {
+          const { supportedFirstFactors } = await signIn!.create({
+            identifier: phone,
+          });
+  
+          const firstPhoneFactor: any = supportedFirstFactors.find((factor: any) => {
+            return factor.strategy === 'phone_code';
+          });
+  
+          const { phoneNumberId } = firstPhoneFactor;
+  
+          await signIn!.prepareFirstFactor({
+            strategy: 'phone_code',
+            phoneNumberId,
+          });
+        } else {
+          await signUp!.create({
+            phoneNumber: phone,
+          });
+          signUp!.preparePhoneNumberVerification();
+        }
+      } catch (err) {
+        console.log('error', JSON.stringify(err, null, 2));
+        if (isClerkAPIResponseError(err)) {
+          Alert.alert('Error', err.errors[0].message);
+        }
+      }
     }
 
   return (
@@ -71,10 +124,11 @@ const Page = () => {
           </View>
         )}
       />
-
-      <TouchableOpacity style={styles.button} onPress={resendCode}>
-        <Text style={styles.buttonText}>Didn't receive a verification code?</Text>
-      </TouchableOpacity>
+      <Link href={"/(tabs)/chats"} asChild replace>
+        <TouchableOpacity style={styles.button} onPress={resendCode}>
+          <Text style={styles.buttonText}>Didn't receive a verification code?</Text>
+        </TouchableOpacity>
+      </Link>
     </View>
   )
 }

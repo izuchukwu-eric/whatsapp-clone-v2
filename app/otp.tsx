@@ -2,23 +2,25 @@ import Colors from '@/constants/Colors';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react'
-import { ActivityIndicator, KeyboardAvoidingView, Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaskInput from 'react-native-mask-input';
+import { isClerkAPIResponseError, useSignIn, useSignUp } from '@clerk/clerk-expo';
 
-const GER_PHONE = [
+const NGR_PHONE = [
   `+`,
   /\d/,
   /\d/,
-  ' ',
-  /\d/,
-  /\d/,
   /\d/,
   ' ',
   /\d/,
   /\d/,
   /\d/,
+  ' ',
   /\d/,
+  /\d/,
+  /\d/,
+  ' ',
   /\d/,
   /\d/,
   /\d/,
@@ -31,22 +33,59 @@ const Page = () => {
   const router = useRouter();
   const keyboardVerticalOffset = Platform.OS === "ios" ? 90 : 0;
   const { bottom } = useSafeAreaInsets();
+  const { signUp, setActive} = useSignUp();
+  const { signIn } = useSignIn();
 
   const openLink = () => {
     Linking.openURL("https://izuchukwu-onukwube.vercel.app")
   }
 
-  const sendOTP = () => {
+  const sendOTP = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      router.push(`/verify/${phoneNumber}`)
-    }, 200)
+    try {
+      await signUp!?.create({
+        phoneNumber
+      })
 
+      console.log('TESafter createT: ', signUp!.createdSessionId);
+
+      signUp!?.preparePhoneNumberVerification();
+
+
+      console.log('after prepare: ');
+      router.push(`/verify/${phoneNumber}`)
+    } catch (error) {
+      console.log(error);
+      if(isClerkAPIResponseError(error)){
+        if(error.errors[0].code === "form_identifier_exists") {
+          console.log("user exists");
+          await trySignIn();
+        } else {
+          setLoading(false);
+          Alert.alert('Error', error.errors[0].message);
+        }
+      }
+    }
   }
 
-  const trySignIn = () => {
+  const trySignIn = async () => {
+    const { supportedFirstFactors } = await signIn!.create({
+      identifier: phoneNumber
+    })
 
+    const firstPhoneFactor: any = supportedFirstFactors.find((factor: any) => {
+      return factor.strategy === 'phone_code'
+    })
+
+    const { phoneNumberId } = firstPhoneFactor;
+
+    await signIn!.prepareFirstFactor({
+      strategy: 'phone_code',
+      phoneNumberId
+    });
+
+    router.push(`/verify/${phoneNumber}?signin=true`);
+    setLoading(false);
   }
 
   return (
@@ -64,7 +103,7 @@ const Page = () => {
 
         <View style={styles.list}>
           <View style={styles.listItem}>
-            <Text style={styles.listItemText}>Germany</Text>
+            <Text style={styles.listItemText}>Nigeria</Text>
             <Ionicons name="chevron-forward" size={20} color={Colors.primary} />
           </View>
           <View style={styles.seperator} />
@@ -78,7 +117,7 @@ const Page = () => {
             onChangeText={(masked, unmasked) => {
               setPhoneNumber(masked); // you can use the unmasked value as well
             }}
-            mask={GER_PHONE}
+            mask={NGR_PHONE}
           />
 
         </View>

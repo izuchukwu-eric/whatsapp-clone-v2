@@ -1,15 +1,15 @@
 import React from 'react'
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import welcomeImage from "@/assets/images/welcome.png";
 import Colors from '@/constants/Colors';
 import { Link } from 'expo-router';
 const welcome_image = Image.resolveAssetSource(welcomeImage).uri;
 
 const Page = () => {
-
     const openLink = () => {
-
+        Linking.openURL("https://izuchukwu-onukwube.vercel.app")
     }
+
   return (
     <View style={styles.container}>
         <Image source={{ uri: welcome_image }} style={styles.welcome} />

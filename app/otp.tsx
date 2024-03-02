@@ -41,31 +41,33 @@ const Page = () => {
   }
 
   const sendOTP = async () => {
+    
     setLoading(true);
-    try {
-      await signUp!?.create({
-        phoneNumber
-      })
+    router.push(`/verify/${phoneNumber}`)
+    // try {
+    //   await signUp!?.create({
+    //     phoneNumber
+    //   })
 
-      console.log('TESafter createT: ', signUp!.createdSessionId);
+    //   console.log('TESafter createT: ', signUp!.createdSessionId);
 
-      signUp!?.preparePhoneNumberVerification();
+    //   signUp!?.preparePhoneNumberVerification();
 
 
-      console.log('after prepare: ');
-      router.push(`/verify/${phoneNumber}`)
-    } catch (error) {
-      console.log(error);
-      if(isClerkAPIResponseError(error)){
-        if(error.errors[0].code === "form_identifier_exists") {
-          console.log("user exists");
-          await trySignIn();
-        } else {
-          setLoading(false);
-          Alert.alert('Error', error.errors[0].message);
-        }
-      }
-    }
+    //   console.log('after prepare: ');
+    //   router.push(`/verify/${phoneNumber}`)
+    // } catch (error) {
+    //   console.log(error);
+    //   if(isClerkAPIResponseError(error)){
+    //     if(error.errors[0].code === "form_identifier_exists") {
+    //       console.log("user exists");
+    //       await trySignIn();
+    //     } else {
+    //       setLoading(false);
+    //       Alert.alert('Error', error.errors[0].message);
+    //     }
+    //   }
+    // }
   }
 
   const trySignIn = async () => {

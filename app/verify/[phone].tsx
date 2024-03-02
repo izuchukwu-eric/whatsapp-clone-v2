@@ -125,7 +125,7 @@ const Page = () => {
         )}
       />
       <Link href={"/(tabs)/chats"} asChild replace>
-        <TouchableOpacity style={styles.button} onPress={resendCode}>
+        <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Didn't receive a verification code?</Text>
         </TouchableOpacity>
       </Link>

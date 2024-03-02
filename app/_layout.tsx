@@ -79,6 +79,7 @@ const InitialLayout = () => {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="otp" options={{ headerTitle: "Enter Your Phone Number", headerBackVisible: false }} />
       <Stack.Screen name="verify/[phone]" options={{ headerBackTitle: "Edit Number" }} />
+      <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
     </Stack>
   );
 }

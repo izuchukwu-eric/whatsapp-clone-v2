@@ -1,13 +1,61 @@
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router'
 import React from 'react'
-import { Text, View } from 'react-native'
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-const _layout = () => {
+const Layout = () => {
   return (
-    <Tabs>
-        
-    </Tabs>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+        <Tabs>
+            <Tabs.Screen 
+                name='updates' 
+                options={{
+                    title: "Updates",
+                    tabBarIcon: ({ size, color }) => (
+                        <MaterialIcons name='update' size={size} color={color} />
+                    )
+                }} 
+            />
+            <Tabs.Screen 
+                name='calls' 
+                options={{
+                    title: "Calls",
+                    tabBarIcon: ({ size, color }) => (
+                        <MaterialCommunityIcons name='phone-outline' size={size} color={color} />
+                    )
+                }} 
+            />
+            <Tabs.Screen 
+                name='communities' 
+                options={{
+                    title: "Communities",
+                    tabBarIcon: ({ size, color }) => (
+                        <MaterialIcons name='people' size={size} color={color} />
+                    )
+                }} 
+            />
+            <Tabs.Screen 
+                name='chats' 
+                options={{
+                    title: "Chats",
+                    tabBarIcon: ({ size, color }) => (
+                        <Ionicons name='chatbubbles' size={size} color={color} />
+                    )
+                }} 
+            />
+            <Tabs.Screen 
+                name='settings' 
+                options={{
+                    title: "Settings",
+                    tabBarIcon: ({ size, color }) => (
+                        <Ionicons name='cog' size={size} color={color} />
+                    )
+                }} 
+            />
+
+        </Tabs>
+    </GestureHandlerRootView>
   )
 }
 
-export default _layout
+export default Layout

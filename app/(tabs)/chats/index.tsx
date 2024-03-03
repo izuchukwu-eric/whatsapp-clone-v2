@@ -16,7 +16,6 @@ const Page = () => {
             keyExtractor={(item) => item.id}
             ItemSeparatorComponent={() => <View style={[defaultStyles.separator, { marginLeft: 90 }]} />}
             renderItem={({ item }) => <ChatRow {...item} />}
-
         />
     </ScrollView>
   )

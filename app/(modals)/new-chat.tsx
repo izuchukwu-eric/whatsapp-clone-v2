@@ -29,7 +29,7 @@ const Page = () => {
             style={{ marginLeft: 14 }}
             renderCustomSectionHeader={(section) => (
                 <View style={styles.sectionHeaderContainer}>
-                    <Text>{section.title}</Text>
+                    <Text style={{ color: Colors.gray }}>{section.title}</Text>
                 </View>    
             )}
             renderCustomItem={(item: any) => (
